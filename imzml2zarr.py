@@ -17,6 +17,7 @@ def collect_metadata(imzml_file):
     
     # For processed format, we track unique m/z values per pixel
     for idx in tqdm(range(len(pixel_coords)), desc="First Pass: Collecting Metadata"):
+        x, y, z = parser.coordinates[idx]
         mz_values, _ = parser.getspectrum(idx)
         unique_mz_values.update(mz_values)
     
@@ -37,6 +38,15 @@ def write_coo_to_zarr(imzml_file, zarr_store_path, unique_mz_values, pixel_coord
     num_pixels = len(pixel_coords)
     num_mz = len(unique_mz_values)
     shape = (num_pixels, num_mz)
+    # Modify the calculation of min and max coordinates
+    max_x = max(pixel_coords, key=lambda coord: coord[0])[0]
+    max_y = max(pixel_coords, key=lambda coord: coord[1])[1]
+    max_z = max(pixel_coords, key=lambda coord: coord[2])[2]
+
+    min_x = min(pixel_coords, key=lambda coord: coord[0])[0]
+    min_y = min(pixel_coords, key=lambda coord: coord[1])[1]
+    min_z = min(pixel_coords, key=lambda coord: coord[2])[2]
+
 
     # Second pass: read each pixel and store data in COO format
     for idx in tqdm(range(len(pixel_coords)), desc="Second Pass: Writing Data"):
@@ -69,13 +79,16 @@ def write_coo_to_zarr(imzml_file, zarr_store_path, unique_mz_values, pixel_coord
     z.attrs['num_mz'] = num_mz
     z.attrs['mz_range'] = (unique_mz_values[0], unique_mz_values[-1]) if unique_mz_values else (None, None)
     z.attrs['pixel_coordinates'] = pixel_coords
+    z.attrs['mass_axis'] = unique_mz_values
+    z.attrs['min_coords'] = (min_x, min_y, min_z)
+    z.attrs['max_coords'] = (max_x, max_y, max_z)
     print(f"Zarr array shape: {z.shape}")
     print(f"Zarr array chunks: {z.chunks}")
     print(f"Zarr array dtype: {z.dtype}")
     print(f"Zarr array compressor: {z.compressor}")
     print(f"Zarr array path: {z.store}")
     print("Zarr array created successfully.")
-    
+
 # Example usage
 unique_mz_values, pixel_coords = collect_metadata(r"C:\Users\tvisv\OneDrive\Desktop\Taste of MSI\rsc Taste of MSI\Ingredient Classification MALDI\Original\20240605_pea_pos.imzML")
 write_coo_to_zarr(r"C:\Users\tvisv\OneDrive\Desktop\Taste of MSI\rsc Taste of MSI\Ingredient Classification MALDI\Original\20240605_pea_pos.imzML", r"C:\Users\tvisv\Downloads\20240605_pea_pos.zarr", unique_mz_values, pixel_coords)
