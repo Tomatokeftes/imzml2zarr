@@ -1,7 +1,7 @@
 import zarr
 
 # Open the Zarr array in read mode
-z = zarr.open(r"C:\Users\tvisv\Downloads\20240605_pea_pos.zarr", mode='r')
+z = zarr.open(r"H:\Eva Data\Dataset\20240826_xenium_0041899.zarr", mode='r')
 
 # Access and print global metadata
 print("Description:", z.attrs['description'])
@@ -9,8 +9,8 @@ print("IMZML File:", z.attrs['imzml_file'])
 print("Number of Pixels:", z.attrs['num_pixels'])
 print("Number of MZ:", z.attrs['num_mz'])
 print("MZ Range:", z.attrs['mz_range'])
-print("Pixel Coordinates:", z.attrs['pixel_coordinates'])
-print("Mass Axis:", z.attrs['mass_axis'])
+# print("Pixel Coordinates:", z.attrs['pixel_coordinates'])
+# print("Mass Axis:", z.attrs['mass_axis'])
 print("Minimum Coordinates:", z.attrs['min_coords'])
 print("Maximum Coordinates:", z.attrs['max_coords'])
 print("Zarr Array Shape:", z.shape)
