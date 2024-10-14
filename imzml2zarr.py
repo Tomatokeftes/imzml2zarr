@@ -143,3 +143,4 @@ def write_data_in_chunks(imzml_file, zarr_store_path, unique_mz_values, pixel_co
 # Example usage
 unique_mz_values, pixel_coords = collect_metadata(r"C:\Users\tvisv\OneDrive\Desktop\Taste of MSI\rsc Taste of MSI\Ingredient Classification MALDI\Original\20240505_onion pos.imzML")
 write_data_in_chunks(r"C:\Users\tvisv\OneDrive\Desktop\Taste of MSI\rsc Taste of MSI\Ingredient Classification MALDI\Original\20240505_onion pos.imzML", r"C:\Users\tvisv\OneDrive\Desktop\Taste of MSI\rsc Taste of MSI\Ingredient Classification MALDI\Original\20240505_onion pos.zarr", unique_mz_values, pixel_coords)
+
