@@ -1,14 +1,10 @@
 import numpy as np
-import sparse
-import zarr
-from tqdm import tqdm
-from pyimzml.ImzMLParser import ImzMLParser
-
-import numpy as np
 import os
 import tempfile
 from tqdm import tqdm
 from pyimzml.ImzMLParser import ImzMLParser
+import zarr
+import sparse
 
 def collect_metadata(imzml_file):
     parser = ImzMLParser(imzml_file)
@@ -49,7 +45,6 @@ def collect_metadata(imzml_file):
 
 
 def deduplicate_mz_values_with_hashes(input_filename, output_filename):
-    import numpy as np
 
     chunk_size = 1_000_000  # Adjust based on available memory
     hash_set = set()
@@ -140,7 +135,11 @@ def write_data_in_chunks(imzml_file, zarr_store_path, unique_mz_values, pixel_co
     print(f"Zarr array created successfully.")
 
 
-# Example usage
-unique_mz_values, pixel_coords = collect_metadata(r"C:\Users\tvisv\OneDrive\Desktop\Taste of MSI\rsc Taste of MSI\Ingredient Classification MALDI\Original\20240505_onion pos.imzML")
-write_data_in_chunks(r"C:\Users\tvisv\OneDrive\Desktop\Taste of MSI\rsc Taste of MSI\Ingredient Classification MALDI\Original\20240505_onion pos.imzML", r"C:\Users\tvisv\OneDrive\Desktop\Taste of MSI\rsc Taste of MSI\Ingredient Classification MALDI\Original\20240505_onion pos.zarr", unique_mz_values, pixel_coords)
+def main():
+    imzml_file = 'path_to_imzml_file'
+    zarr_store_path = 'path_to_zarr_store'
+    unique_mz_values, pixel_coords = collect_metadata(imzml_file)
+    write_data_in_chunks(imzml_file, zarr_store_path, unique_mz_values, pixel_coords)
 
+if __name__ == "__main__":
+    main()

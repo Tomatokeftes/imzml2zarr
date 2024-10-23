@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "imzml2zarr"
+version = "0.1"
+description = "A tool for converting imzML to Zarr format"
+dependencies = ["zarr"]
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "."
+]
