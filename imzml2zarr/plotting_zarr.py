@@ -101,10 +101,6 @@ if __name__ == '__main__':
         ion_image[y, x] = total_intensities[i]
 
 
-    # Flip the image array vertically
-    ion_image = np.flipud(ion_image)
-    print(ion_image.shape)
-
     # Plot the total ion image using matplotlib
     plt.figure(figsize=(10, 8))
     plt.imshow(ion_image, cmap='viridis', origin="lower")

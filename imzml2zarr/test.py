@@ -3,16 +3,21 @@ from zarr_writer import ZarrWriter
 
 
 def main():
-    imzml_file = r"C:\Users\tvisv\Downloads\ZarrConvert\tests\data\test_processed.imzML"
+    imzml_file_path = r"C:\Users\tvisv\OneDrive\Desktop\Taste of MSI\rsc Taste of MSI\Ingredient Classification MALDI\Original\20240605_pea_pos.imzML"
     zarr_store_path = r'C:\Users\tvisv\Downloads\test_processed.zarr'
     
-    # Step 1: Parse imzML file
-    imzml_parser = ProcessedImzMLParser(imzml_file)
-    unique_mz_values, pixel_coords = imzml_parser.collect_metadata()
+    # Initialize the parser
+    parser = ProcessedImzMLParser(file_path=imzml_file_path)
 
-    # Step 2: Create Zarr writer and write data
-    zarr_writer = ZarrWriter(zarr_store_path, unique_mz_values, pixel_coords)
-    zarr_writer.write_data_in_chunks(imzml_parser)
+    # Collect metadata (unique m/z values and pixel coordinates)
+    unique_mz_values, pixel_coords = parser.collect_metadata()
+
+    # Initialize the Zarr writer
+    writer = ZarrWriter(zarr_store_path=zarr_store_path, unique_mz_values=unique_mz_values, pixel_coords=pixel_coords)
+
+    # Write the data to Zarr in chunks
+    chunk_size = 1000  # Adjust the chunk size based on memory capacity and performance needs
+    writer.write_data_in_chunks(parser=parser, chunk_size=chunk_size)
 
 if __name__ == "__main__":
     main()
