@@ -52,7 +52,7 @@ if __name__ == '__main__':
     print(f"Dask dashboard link: {client.dashboard_link}")
     
     # Open the Zarr array with Dask using lazy loading
-    zarr_store = zarr.open(r"C:\Users\tvisv\OneDrive\Desktop\Taste of MSI\rsc Taste of MSI\Ingredient Classification MALDI\Original\20240505_onion pos.zarr", mode='r')
+    zarr_store = zarr.open(r"C:\Users\tvisv\Downloads\test_processed.zarr", mode='r')
     dask_array = da.from_zarr(zarr_store)
 
     # Access metadata from the Zarr store
@@ -67,20 +67,21 @@ if __name__ == '__main__':
     # Calculate the mean mass spectrum across all spatial pixels
     average_mass_spectrum = dask_array.mean(axis=0)  # Mean over spatial dimensions
 
-    # Use progress bar during computation
-    with ProgressBar():
-        average_mass_spectrum_computed = average_mass_spectrum.compute()
+    # # Use progress bar during computation
+    # with ProgressBar():
+    #     average_mass_spectrum_computed = average_mass_spectrum.compute()
 
-    # Plot using the mass axis for the x-axis
-    plt.plot(mz_axis, average_mass_spectrum_computed)
-    plt.xlabel('m/z')
-    plt.ylabel('Intensity')
-    plt.title('Average Mass Spectrum')
-    plt.show()
+    # # Plot using the mass axis for the x-axis
+    # plt.plot(mz_axis, average_mass_spectrum_computed)
+    # plt.xlabel('m/z')
+    # plt.ylabel('Intensity')
+    # plt.title('Average Mass Spectrum')
+    # plt.show()
 
     total_ion_image = dask_array.sum(axis=1)
+    print(total_ion_image.shape)
 
-        # Load the pixel coordinates (they are small, so can be loaded into memory)
+    # Load the pixel coordinates (they are small, so can be loaded into memory)
     pixel_coords = np.array(zarr_store.attrs['pixel_coordinates'])
 
     # Extract x, y coordinates from the pixel coordinates
@@ -90,6 +91,7 @@ if __name__ == '__main__':
     # Create an empty image array (filled with NaN initially)
     max_x, max_y = np.max(x_coords), np.max(y_coords)
     ion_image = np.full((max_y + 1, max_x + 1), np.nan)
+    print(ion_image.shape)
 
     # Compute the total ion image (this loads data lazily)
     total_intensities = total_ion_image.compute()
@@ -97,6 +99,11 @@ if __name__ == '__main__':
     # Place the intensity values at the correct (x, y) positions
     for i, (x, y) in enumerate(zip(x_coords, y_coords)):
         ion_image[y, x] = total_intensities[i]
+
+
+    # Flip the image array vertically
+    ion_image = np.flipud(ion_image)
+    print(ion_image.shape)
 
     # Plot the total ion image using matplotlib
     plt.figure(figsize=(10, 8))
