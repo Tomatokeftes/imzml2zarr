@@ -1,0 +1,24 @@
+{
+    "imzml": {
+        "source": "C:\\Users\\tvisv\\OneDrive\\Desktop\\Taste of MSI\\rsc\\Ingredient Classification MALDI\\Original\\20240605_pea_pos.imzML",
+        "uuid": "9069a51f-11a8-4f15-aabb-43624def10d0"
+    },
+    "multiscales": [
+        {
+            "axes": [
+                "c",
+                "z",
+                "y",
+                "x"
+            ],
+            "datasets": [
+                {
+                    "path": "0"
+                }
+            ],
+            "name": "pea4",
+            "type": "none",
+            "version": "0.4"
+        }
+    ]
+}

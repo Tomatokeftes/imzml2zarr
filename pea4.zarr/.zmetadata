@@ -1,0 +1,136 @@
+{
+    "metadata": {
+        ".zattrs": {
+            "imzml": {
+                "source": "C:\\Users\\tvisv\\OneDrive\\Desktop\\Taste of MSI\\rsc\\Ingredient Classification MALDI\\Original\\20240605_pea_pos.imzML",
+                "uuid": "9069a51f-11a8-4f15-aabb-43624def10d0"
+            },
+            "multiscales": [
+                {
+                    "axes": [
+                        "c",
+                        "z",
+                        "y",
+                        "x"
+                    ],
+                    "datasets": [
+                        {
+                            "path": "0"
+                        }
+                    ],
+                    "name": "pea4",
+                    "type": "none",
+                    "version": "0.4"
+                }
+            ]
+        },
+        ".zgroup": {
+            "zarr_format": 2
+        },
+        "0/.zarray": {
+            "chunks": [
+                1159,
+                1,
+                17,
+                33
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "lz4",
+                "id": "blosc",
+                "shuffle": 1
+            },
+            "dimension_separator": "/",
+            "dtype": "<f4",
+            "fill_value": 0.0,
+            "filters": null,
+            "order": "C",
+            "shape": [
+                9270,
+                1,
+                133,
+                131
+            ],
+            "zarr_format": 2
+        },
+        "0/.zattrs": {
+            "_ARRAY_DIMENSIONS": [
+                "c",
+                "z",
+                "y",
+                "x"
+            ]
+        },
+        "labels/.zattrs": {
+            "labels": [
+                "mzs/0",
+                "lengths/0"
+            ]
+        },
+        "labels/.zgroup": {
+            "zarr_format": 2
+        },
+        "labels/lengths/.zgroup": {
+            "zarr_format": 2
+        },
+        "labels/lengths/0/.zarray": {
+            "chunks": [
+                1,
+                1,
+                133,
+                131
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "zstd",
+                "id": "blosc",
+                "shuffle": 2
+            },
+            "dimension_separator": "/",
+            "dtype": "<u4",
+            "fill_value": 0,
+            "filters": null,
+            "order": "C",
+            "shape": [
+                1,
+                1,
+                133,
+                131
+            ],
+            "zarr_format": 2
+        },
+        "labels/mzs/.zgroup": {
+            "zarr_format": 2
+        },
+        "labels/mzs/0/.zarray": {
+            "chunks": [
+                1159,
+                1,
+                17,
+                17
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "zstd",
+                "id": "blosc",
+                "shuffle": 2
+            },
+            "dimension_separator": "/",
+            "dtype": "<f8",
+            "fill_value": 0.0,
+            "filters": null,
+            "order": "C",
+            "shape": [
+                9270,
+                1,
+                133,
+                131
+            ],
+            "zarr_format": 2
+        }
+    },
+    "zarr_consolidated_format": 1
+}

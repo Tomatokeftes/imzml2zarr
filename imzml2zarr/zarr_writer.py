@@ -1,81 +1,68 @@
-import zarr
-import sparse
-import numpy as np
-from tqdm import tqdm
 import xarray as xr
+import dask.array as da
+import numpy as np
 
 class ZarrWriter:
-    def __init__(self, zarr_store_path, unique_mz_values, pixel_coords):
+    def __init__(self, zarr_store_path, mass_axis, x_coords, y_coords, metadata):
         self.zarr_store_path = zarr_store_path
-        self.unique_mz_values = unique_mz_values
-        self.pixel_coords = pixel_coords
-        self.mz_index_map = {mz: i for i, mz in enumerate(unique_mz_values)}
-        self.num_pixels = len(pixel_coords)
-        self.num_mz = len(unique_mz_values)
-        self.shape = (self.num_pixels, self.num_mz)
+        self.mass_axis = mass_axis
+        self.x_coords = x_coords
+        self.y_coords = y_coords
+        self.num_x = len(x_coords)
+        self.num_y = len(y_coords)
+        self.num_mz = len(mass_axis)
+        # Create mappings from coordinate values to indices
+        self.x_coord_map = {coord: idx for idx, coord in enumerate(self.x_coords)}
+        self.y_coord_map = {coord: idx for idx, coord in enumerate(self.y_coords)}
 
-    def create_zarr_store(self, chunks=(16384, 5000)):
+
+    def create_store(self):
         """
-        Create a Zarr store for writing the data.
+        Initialize the Zarr store with an empty dataset and predefined metadata.
         """
-        z = zarr.zeros(shape=self.shape, chunks=chunks, dtype=np.uint32, store=self.zarr_store_path, overwrite=True)
-        return z
 
-    def write_data_in_chunks(self, parser, chunk_size=1000):
-        """
-        Writes mass spectrometry imaging data to a Zarr array in chunks using the given parser.
-        """
-        z = self.create_zarr_store()
+        # Create a dummy DataArray to initialize the Zarr store
+        dummy_data = da.zeros(
+            (self.num_x, self.num_y, self.num_mz), 
+            chunks=(64, 64, min(50000, self.num_mz)),  # Chunk sizes to balance memory and speed
+            dtype=np.float32
+        )
 
-        # Process data in chunks
-        total_pixels = self.num_pixels
-        with tqdm(total=total_pixels, desc="Overall Progress", unit="pixel") as pbar:
-            for chunk_data in parser.collect_data_in_chunks(chunk_size):
-                self._process_chunk(z, chunk_data, pbar)
+        # Wrap in an xarray DataArray
+        data = xr.DataArray(
+            dummy_data,
+            dims=('x_coordinate', 'y_coordinate', 'mz_channel'),
+            coords={
+                'x_coordinate': np.arange(self.num_x),
+                'y_coordinate': np.arange(self.num_y),
+                'mz_channel': self.mass_axis
+            },
+            name='intensity'
+        )
 
-        self._add_zarr_metadata(z)
-        print(f"Zarr array created successfully at {self.zarr_store_path}.")
+        # Write metadata only to Zarr store
+        data.to_zarr(self.zarr_store_path, mode='w', consolidated=True, compute=False, group='data')
 
-    def _process_chunk(self, z, chunk_data, pbar):
-        """
-        Processes a chunk of pixels and writes the data to the Zarr array.
-        """
-        coords = [[], []]  # Coordinates for non-zero values (row index within chunk, column index)
-        data = []
+    def write_block(self, block_ds):
+        start_x_coord = block_ds.coords['x_coordinate'].values[0]
+        start_y_coord = block_ds.coords['y_coordinate'].values[0]
 
-        for idx_in_chunk, (mz_values, intensities) in enumerate(chunk_data):
-            for mz, intensity in zip(mz_values, intensities):
-                column_index = self.mz_index_map.get(mz, -1)
-                if column_index >= 0:
-                    coords[0].append(idx_in_chunk)
-                    coords[1].append(column_index)
-                    data.append(intensity)
+        start_x_idx = self.x_coord_map[start_x_coord]
+        start_y_idx = self.y_coord_map[start_y_coord]
 
-            pbar.update(1)
+        # Since mz_channel dimension matches, we can set start and end indices directly
+        mz_start_idx = 0
+        end_mz_idx = self.num_mz
 
-        # Write sparse COO array to Zarr
-        if data:
-            self._write_sparse_array_to_zarr(coords, data, z)
+        region = {
+            "x_coordinate": slice(start_x_idx, start_x_idx + block_ds.sizes["x_coordinate"]),
+            "y_coordinate": slice(start_y_idx, start_y_idx + block_ds.sizes["y_coordinate"]),
+            "mz_channel": slice(mz_start_idx, end_mz_idx)
+        }
 
-    def _write_sparse_array_to_zarr(self, coords, data, z):
-        """
-        Writes a sparse COO array to the Zarr array.
-        """
-        coords = np.array(coords)
-        data = np.array(data)
-        chunk_shape = (len(data), self.num_mz)
-        coo_array = sparse.COO(coords, data, shape=chunk_shape)
-
-        # Write data to Zarr array
-        z.set_coordinate_selection((coo_array.coords[0], coo_array.coords[1]), coo_array.data)
-
-    def _add_zarr_metadata(self, z):
-        """
-        Adds metadata to the Zarr store.
-        """
-        z.attrs['description'] = "Mass spectrometry imaging data in Zarr format"
-        z.attrs['num_pixels'] = self.num_pixels
-        z.attrs['num_mz'] = self.num_mz
-        z.attrs['mz_range'] = (self.unique_mz_values[0], self.unique_mz_values[-1]) if self.unique_mz_values.size > 0 else (None, None)
-        z.attrs['pixel_coordinates'] = self.pixel_coords.tolist()
-        z.attrs['mass_axis'] = self.unique_mz_values.tolist()
+        block_ds.to_zarr(
+            self.zarr_store_path,
+            mode='a',
+            region=region,
+            group='data'
+        )
